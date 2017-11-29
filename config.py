@@ -11,9 +11,10 @@ class Config:
     #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % DB_PATH
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:!Q2w3e4r@localhost/blogdb'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    #
-    SITE_WIDTH = 800
 
+    #flask
+    SITE_WIDTH = 800
+    SECRET_KEY = 'keep a secret!'
 class DevelopmentConfig:
     pass
 

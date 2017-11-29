@@ -23,16 +23,21 @@ class Post(db.Model):
         self.timestamp = datetime.datetime.now()
         db.session.commit()
 
+    def __repr__(self):
+        pass
     #insert one post
     @classmethod
-    def insert(title, content, published):
+    def insert(cls, title, content, published):
         post = Post(title = title,
-                 content = "test",
-                 published = False)
+                 content = content,
+                 published = published)
         post.slug = re.sub('[^\w]+', '-', post.title.lower())
-        db.session.add(test_post)
+        db.session.add(post)
         db.session.commit()
         return post
 
-   def __repr__(self):
-        return
+    #query all posts 
+    @classmethod
+    def query_posts(cls):
+        posts = Post.query.filter_by(published = True).order_by(db.desc(Post.timestamp)).all()
+        return posts

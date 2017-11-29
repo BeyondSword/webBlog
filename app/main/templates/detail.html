@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}{{ entry.title }}{% endblock %}
+{% block title %}{{ post.title }}{% endblock %}
 
-{% block content_title %}{{ entry.title }}{% endblock %}
+{% block content_title %}{{ post.title }}{% endblock %}
 
 {% block extra_header %}
   {% if session.logged_in %}
-    <li><a href="{{ url_for('edit', slug=entry.slug) }}">Edit entry</a></li>
+    <li><a href="{{ url_for('main.edit', slug=post.slug) }}">Edit post</a></li>
   {% endif %}
 {% endblock %}
 
 {% block content %}
-  <p>Created {{ entry.timestamp.strftime('%m/%d/%Y at %G:%I%p') }}</p>
-  {{ entry.html_content }}
+  <p>Created {{ post.timestamp.strftime('%m/%d/%Y at %G:%I%p') }}</p>
+  {{ post._content }}
 {% endblock %}

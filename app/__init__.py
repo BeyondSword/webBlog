@@ -11,8 +11,7 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    from app import alchemy_model
-    from app.alchemy_model import db, test_insert, Post
+    from app.alchemy_model import db, Post
     with app.app_context():
         db.init_app(app)
     if False == os.path.isfile(config[config_name].DB_PATH):

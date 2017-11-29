@@ -4,6 +4,6 @@
 
 {% block content_title %}Edit post{% endblock %}
 
-{% block form_action %}{{ url_for('edit', slug = post.slug) }}{% endblock %}
+{% block form_action %}{{ url_for('main.edit', slug = post.slug) }}{% endblock %}
 
 {% block save_button %}Save changes{% endblock %}

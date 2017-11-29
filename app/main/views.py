@@ -2,9 +2,8 @@ from .import main
 from flask import (request, render_template, session, url_for, redirect, flash)
 import functools
 from test.log import logger, set_log
-from app.model import Entry, FTSEntry
 from playhouse.flask_utils import object_list, get_object_or_404
-from app.alchemy_model import test_insert, Post
+from app.alchemy_model import Post
 
 from manage import app
 
@@ -20,7 +19,7 @@ def log_required(fn):
 @main.route("/draft/")
 @log_required
 def drafts():
-    query = Entry.drafts().order_by(Entry.timestamp.desc())
+    query = Post.drafts().order_by(Entry.timestamp.desc())
     return objects_list('index.html', query)
 
 
@@ -31,10 +30,11 @@ def create():
     if request.method == 'POST':
         #both title & content is required
         if request.form.get('title') and request.form.get('content'):
-            post = Post.insert(title = request.form['title'],
-                        content = request.form['content'],
-                        published = request.form['published'])
-            flash('Entry created successfully.', 'success')
+            published = request.form.get('published') or False
+            post = Post.insert(title = request.form.get('title'),
+                        content = request.form.get('content'),
+                        published = published)
+            flash('Post created successfully.', 'success')
             if post.published:
                 return redirect(url_for('.detail', slug = post.slug))
             else:
@@ -54,7 +54,7 @@ def edit(slug):
             post.modify(request.form['title'], request.form[content],
                     request.form[published])
 
-            flash('Entry saved successfully.', 'success')
+            flash('Post saved successfully.', 'success')
             if post.published:
                 return redirect(url_for('.detail', slug=post.slug))
             else:
@@ -66,13 +66,13 @@ def edit(slug):
 
 
 
-@main.route("/slug/")
+@main.route("/<slug>/")
 def detail(slug):
     if session.get('logged_in'):
-        query = Entry.select()
+        post = Post.query.filter_by(slug = slug).first_or_404()
     else:
-        query = Entry.public()
-    post = get_object_or_404(query, Entry.slug == slug)
+        post = Post.query.filter_by(slug = slug, published =
+                True).first_or_404()
     return render_template('detail.html', post = post)
 
 
@@ -81,10 +81,10 @@ def detail(slug):
 def index():
     search_query = request.args.get('q')
     if search_query:
-        query = Entry.search(search_query)
+        query = Post.search(search_query)
     else:
-        query = Entry.public().order_by(Entry.timestamp.desc())
-    return render_template("index.html", query = query)
+        posts = Post.query_posts()
+    return render_template("index.html", posts = posts)
 @property
 def html_content(self):
     hilite = CodeHiliteExtension(linenums=False, css_class='highlight')
@@ -124,7 +124,3 @@ def register():
     if request.method == 'POST':
         pass
     return render_template('register.html')
-
-
-
-
