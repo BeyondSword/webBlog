@@ -3,7 +3,8 @@ from flask import (request, render_template, session, url_for, redirect, flash)
 import functools
 from test.log import logger, set_log
 from app.model import Entry, FTSEntry
-from playhouse.flask_utils import object_list
+from playhouse.flask_utils import object_list, get_object_or_404
+from app.alchemy_model import test_insert, Post
 
 from manage import app
 
@@ -25,19 +26,19 @@ def drafts():
 
 
 @main.route('/create/', methods=['GET', 'POST'])
-@log_required
+#@log_required
 def create():
     if request.method == 'POST':
+        #both title & content is required
         if request.form.get('title') and request.form.get('content'):
-            entry = Entry.create(
-                title=request.form['title'],
-                content=request.form['content'],
-                published=request.form.get('published') or False)
+            post = Post.insert(title = request.form['title'],
+                        content = request.form['content'],
+                        published = request.form['published'])
             flash('Entry created successfully.', 'success')
-            if entry.published:
-                return redirect(url_for('.detail', slug=entry.slug))
+            if post.published:
+                return redirect(url_for('.detail', slug = post.slug))
             else:
-                return redirect(url_for('.edit', slug=entry.slug))
+                return redirect(url_for('.edit', slug = post.slug))
         else:
             flash('Title and Content are required.', 'danger')
     return render_template('create.html')
@@ -45,25 +46,23 @@ def create():
 
 
 @main.route('/<slug>/edit/', methods=['GET', 'POST'])
-@log_required
+#@log_required
 def edit(slug):
-    entry = get_object_or_404(Entry, Entry.slug == slug)
+    post = Post.query.filter_by(slug = slug).first_or_404()
     if request.method == 'POST':
         if request.form.get('title') and request.form.get('content'):
-            entry.title = request.form['title']
-            entry.content = request.form['content']
-            entry.published = request.form.get('published') or False
-            entry.save()
+            post.modify(request.form['title'], request.form[content],
+                    request.form[published])
 
             flash('Entry saved successfully.', 'success')
-            if entry.published:
-                return redirect(url_for('.detail', slug=entry.slug))
+            if post.published:
+                return redirect(url_for('.detail', slug=post.slug))
             else:
-                return redirect(url_for('.edit', slug=entry.slug))
+                return redirect(url_for('.edit', post=post))
         else:
             flash('Title and Content are required.', 'danger')
 
-    return render_template('edit.html', entry=entry)
+    return render_template('edit.html', post = post)
 
 
 
@@ -73,8 +72,8 @@ def detail(slug):
         query = Entry.select()
     else:
         query = Entry.public()
-    entry = get_object_or_404(query, Entry.slug == slug)
-    return render_template('detail.html', entry = entry)
+    post = get_object_or_404(query, Entry.slug == slug)
+    return render_template('detail.html', post = post)
 
 
 

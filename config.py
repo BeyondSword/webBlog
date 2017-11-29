@@ -1,16 +1,34 @@
 import os
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    PASSWORD = '12345678'
+    #user define
+    DB_NAME = 'blog.sqlite'
     APP_DIR = os.path.dirname(os.path.realpath(__file__))
-    DATABASE = 'sqliteext:///%s' % os.path.join(APP_DIR, 'blog.db')
-    DEBUG = False
-    SECRET_KEY = 'shhh, secret!'
+    DB_PATH = os.path.join(APP_DIR, DB_NAME)
+
+
+    #database
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % DB_PATH
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:!Q2w3e4r@localhost/blogdb'
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    #
     SITE_WIDTH = 800
 
+class DevelopmentConfig:
+    pass
+
+class TestingConfig:
+    pass
+
+class ProductionConfig:
+    pass
+
+#a dict to store configs
 config = {
-    "default": Config
+    "default": Config,
+    "testing": TestingConfig,
+    "development": DevelopmentConfig,
+    "production": ProductionConfig
 }
 
 

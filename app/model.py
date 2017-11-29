@@ -1,5 +1,6 @@
 from playhouse.flask_utils import (FlaskDB)
 from playhouse.sqlite_ext import *
+from peewee import *
 import datetime
 from test.log import logger, set_log
 
@@ -71,13 +72,15 @@ class Entry(BaseModel):
     published = BooleanField(index=True)
     timestamp = DateTimeField(default=datetime.datetime.now, index=True)
 
-    def save(self, *args, **kwargs):
+    #override save()
+    def save_for(self, *args, **kwargs):
         if not self.slug:
-            self.slug = re.sub('[^\w]+', '-', self.title.lower())
+            self.slug = (re.sub('[^\w]+', '-', self.title.lower())).encode("utf-8")
+        logger.info(self.slug, " ", self.content, " ", self.title)
         ret = super(Entry, self).save(*args, **kwargs)
 
         # Store search content.
-        self.update_search_index()
+        # self.update_search_index()
         return ret
 
     def update_search_index(self):
