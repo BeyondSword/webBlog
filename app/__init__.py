@@ -4,7 +4,7 @@ from config import config
 from test.log import logger, set_log
 import os.path
 
-
+pagedown = PageDown()
 
 def create_app(config_name):
     logger.info(__name__ + "  " + config[config_name].SQLALCHEMY_DATABASE_URI)
