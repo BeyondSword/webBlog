@@ -15,7 +15,7 @@ class Config:
     #flask
     SITE_WIDTH = 800
     SECRET_KEY = 'keep a secret!'
-class DevelopmentConfig:
+class DevelopmentConfig(object):
     pass
 
 class TestingConfig:
