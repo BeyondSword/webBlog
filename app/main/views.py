@@ -3,9 +3,10 @@ from flask import (request, render_template, session, url_for, redirect, flash)
 import functools
 from test.log import logger, set_log
 from playhouse.flask_utils import object_list, get_object_or_404
-from app.alchemy_model import Post
+from APP.alchemy_model import Post
 
-from manage import app
+from APP.form import PostForm
+from manage import APP
 
 #define decorator   check if user has logged in
 def log_required(fn):
@@ -27,53 +28,55 @@ def drafts():
 @main.route('/create/', methods=['GET', 'POST'])
 #@log_required
 def create():
-    if request.method == 'POST':
-        #both title & content is required
-        if request.form.get('title') and request.form.get('content'):
-            published = request.form.get('published') or False
-            post = Post.insert(title = request.form.get('title'),
-                        content = request.form.get('content'),
-                        published = published)
-            flash('Post created successfully.', 'success')
-            if post.published:
-                return redirect(url_for('.detail', slug = post.slug))
-            else:
-                return redirect(url_for('.edit', slug = post.slug))
+    post_form = PostForm()
+    #check if method is 'POST' & data is validate
+    if post_form.validate_on_submit():
+        post = Post.insert(title=post_form.title.data,
+                           content=post_form.content.data,
+                           published=post_form.published.data
+                          )
+        flash('Post created successfully.', 'success')
+        if post.published:
+            return redirect(url_for('.detail', slug=post.slug))
         else:
-            flash('Title and Content are required.', 'danger')
-    return render_template('create.html')
+            return redirect(url_for('.edit', slug=post.slug))
+    return render_template('create.html', post_form=PostForm())
 
 
 
 @main.route('/<slug>/edit/', methods=['GET', 'POST'])
 #@log_required
 def edit(slug):
-    post = Post.query.filter_by(slug = slug).first_or_404()
-    if request.method == 'POST':
-        if request.form.get('title') and request.form.get('content'):
-            post.modify(request.form['title'], request.form[content],
-                    request.form[published])
-
-            flash('Post saved successfully.', 'success')
-            if post.published:
-                return redirect(url_for('.detail', slug=post.slug))
-            else:
-                return redirect(url_for('.edit', post=post))
+    post = Post.query.filter_by(slug=slug).first_or_404()
+    post_form = PostForm()
+    #check if method is 'POST' & data is validate
+    if post_form.validate_on_submit():
+        post.modify(post_form.title.data,
+                    post_form.content.data,
+                    post_form.published.data
+                   )
+        flash('Post saved successfully.', 'success')
+        if post.published:
+            return redirect(url_for('.detail', slug=post.slug))
         else:
-            flash('Title and Content are required.', 'danger')
+            return redirect(url_for('.edit', post=post))
+    #flash('Title and Content are required.', 'danger')
 
-    return render_template('edit.html', post = post)
+    #get data from DB to form
+    post_form.title.data = post.title
+    post_form.content.data = post.content
+    post_form.published.data = post.published
+    return render_template('edit.html', post_form=post_form)
 
 
 
 @main.route("/<slug>/")
 def detail(slug):
     if session.get('logged_in'):
-        post = Post.query.filter_by(slug = slug).first_or_404()
+        post = Post.query.filter_by(slug=slug).first_or_404()
     else:
-        post = Post.query.filter_by(slug = slug, published =
-                True).first_or_404()
-    return render_template('detail.html', post = post)
+        post = Post.query.filter_by(slug=slug, published=True).first_or_404()
+    return render_template('detail.html', post=post)
 
 
 
@@ -104,7 +107,7 @@ def login():
     logger.debug(url_for('main.static', filename='css/blog.min.css'))
     next_url = request.args.get("next") or request.form.get("next")
     if request.method == 'POST' and request.form.get("password"):
-        if request.form.get("password") == app.config['PASSWORD']:
+        if request.form.get("password") == APP.config['PASSWORD']:
             session['logged_in'] = True
             session.permanent = True
             flash('you are now logged in', 'success')

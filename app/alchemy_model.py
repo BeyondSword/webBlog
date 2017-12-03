@@ -1,43 +1,43 @@
-from flask_sqlalchemy import SQLAlchemy
 import datetime
 import re
+from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLAlchemy()
-
-class Post(db.Model):
+DB = SQLAlchemy()
+class Post(DB.Model):
     __tablename__ = 'posts'
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(128), unique = True, index = True)
-    slug = db.Column(db.String(128), unique = True, index = True)
-    content = db.Column(db.Text)
-    published = db.Column(db.Boolean, index = True)
-    timestamp = db.Column(db.DateTime, default = datetime.datetime.now, index = True)
+    id = DB.Column(DB.Integer, primary_key=True)
+    title = DB.Column(DB.String(128), unique=True, index=True)
+    slug = DB.Column(DB.String(128), unique=True, index=True)
+    content = DB.Column(DB.Text)
+    published = DB.Column(DB.Boolean, index=True)
+    timestamp = DB.Column(DB.DateTime, default=datetime.datetime.now, index=True)
 
     #modify post
     def modify(self, title, content, published):
-        self.slug = re.sub('[^\w]+', '-', post.title.lower())
+        self.slug = re.sub(r'[^\w]+', '-', self.title.lower())
         self.title = title
         self.content = content
         self.published = published
         self.timestamp = datetime.datetime.now()
-        db.session.commit()
+        DB.session.commit()
 
     def __repr__(self):
         pass
     #insert one post
     @classmethod
     def insert(cls, title, content, published):
-        post = Post(title = title,
-                 content = content,
-                 published = published)
-        post.slug = re.sub('[^\w]+', '-', post.title.lower())
-        db.session.add(post)
-        db.session.commit()
+        post = Post(title=title,
+                    content=content,
+                    published=published
+                   )
+        post.slug = re.sub(r'[^\w]+', '-', post.title.lower())
+        DB.session.add(post)
+        DB.session.commit()
         return post
 
-    #query all posts 
+    #query all posts
     @classmethod
     def query_posts(cls):
-        posts = Post.query.filter_by(published = True).order_by(db.desc(Post.timestamp)).all()
+        posts = Post.query.filter_by(published=True).order_by(DB.desc(Post.timestamp)).all()
         return posts
