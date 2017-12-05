@@ -11,6 +11,6 @@
 {% endblock %}
 
 {% block content %}
-  <p>Created {{ post.timestamp.strftime('%m/%d/%Y at %G:%I%p') }}</p>
-  {{ post._content }}
+ <p>Created at {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
+  {{ post.content }}
 {% endblock %}

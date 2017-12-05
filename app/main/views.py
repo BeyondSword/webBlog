@@ -3,9 +3,9 @@ from flask import (request, render_template, session, url_for, redirect, flash)
 import functools
 from test.log import logger, set_log
 from playhouse.flask_utils import object_list, get_object_or_404
-from APP.alchemy_model import Post
+from app.alchemy_model import Post
 
-from APP.form import PostForm
+from app.form import PostForm
 from manage import APP
 
 #define decorator   check if user has logged in

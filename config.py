@@ -6,7 +6,6 @@ class Config:
     APP_DIR = os.path.dirname(os.path.realpath(__file__))
     DB_PATH = os.path.join(APP_DIR, DB_NAME)
 
-
     #database
     #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % DB_PATH
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:!Q2w3e4r@localhost/blogdb'

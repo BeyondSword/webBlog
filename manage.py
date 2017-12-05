@@ -8,7 +8,7 @@ APP = create_app('default')
 def main():
     """run a wsgi server to debug"""
     APP.run(
-        host="198.181.33.17",
+        host="localhost",
         debug=True,
         port=8090)
 if __name__ == "__main__":
