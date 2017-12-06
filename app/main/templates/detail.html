@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block extra_scripts %}
+    {{pagedown.include_pagedown()}}
+{% endblock %}
+
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content_title %}{{ post.title }}{% endblock %}

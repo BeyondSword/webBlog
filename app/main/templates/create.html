@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf%}
+{% block extra_scripts %}
+    {{pagedown.include_pagedown()}}
+{% endblock %}
 
 {% block title %}Create post{% endblock %}
 

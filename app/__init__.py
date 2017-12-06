@@ -4,12 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template
 from config import config
 from flask_bootstrap import Bootstrap
+from flask_pagedown import PageDown
 
+PAGEDOWN = PageDown()
 def create_app(config_name):
     logger.info(__name__ + "  " + config[config_name].SQLALCHEMY_DATABASE_URI)
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     Bootstrap(app)
+    PAGEDOWN.init_app(app)
 
     from app.alchemy_model import DB 
     with app.app_context():
