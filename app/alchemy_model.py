@@ -1,10 +1,29 @@
 """define SQLAlchemy model"""
 import datetime
 import re
+from test.log import logger
 from flask_sqlalchemy import SQLAlchemy
 import bleach
+from markdown import markdown
 
 DB = SQLAlchemy()
+class Role(DB.model):
+    __tablename__ = 'roles'
+    index = DB.Column(DB.Integer, primary_key=True)
+    name = DB.Column(DB.String(64), unique=True) 
+    users = DB.relationship('User', backref='role')
+
+    def __repr__(self):
+        return '<Role %r>' % self.name
+class User(DB.Model):
+    __tablename__ = 'users'
+    index = DB.Column(DB.Integer, primary_key=True)
+    username = DB.Column(DB.String(64), unique=True)
+    role_id = DB.Column(DB.Integer, DB.ForeignKey("roles.id"))
+
+    def __repr__(self):
+        return '<Role %r>' % self.username
+
 class Post(DB.Model):
     """define post"""
     __tablename__ = 'posts'
@@ -50,14 +69,17 @@ class Post(DB.Model):
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
+        """Transfer Markdown text into HTML"""
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p'
                        ]
                     
-        target.content_html = bleach.linkfy(bleach.clean(
+        target.content_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True
         ))
 
-    DB.event.listen(Post.content, 'set', Post.on_changed_body)
+        logger.info("transfer markdown text to html")
+
+DB.event.listen(Post.content, 'set', Post.on_changed_body)

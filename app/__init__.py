@@ -14,11 +14,14 @@ def create_app(config_name):
     Bootstrap(app)
     PAGEDOWN.init_app(app)
 
-    from app.alchemy_model import DB 
+    from app.alchemy_model import DB, Post 
     with app.app_context():
         DB.init_app(app)
+    DB.event.listen(Post.content, 'set', Post.on_changed_body)
+
     if not os.path.isfile(config[config_name].DB_PATH):
         open(config[config_name].DB_PATH, 'w+')
+        DB.drop_all(app=app)
         DB.create_all(app=app)
         #test_insert(app)
         pass

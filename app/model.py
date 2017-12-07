@@ -1,3 +1,4 @@
+"""Used peewee as orm, now it has been discarded"""
 from playhouse.flask_utils import (FlaskDB)
 from playhouse.sqlite_ext import *
 from peewee import *

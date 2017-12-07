@@ -16,5 +16,9 @@
 
 {% block content %}
  <p>Created at {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
-  {{ post.content }}
+  {% if post.content_html %} 
+    {{ post.content_html | safe }}
+  {% else %}
+    {{ post.content}}
+  {% endif %}
 {% endblock %}
