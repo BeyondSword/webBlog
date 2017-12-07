@@ -2,7 +2,7 @@
 import datetime
 import re
 from flask_sqlalchemy import SQLAlchemy
-
+import bleach
 
 DB = SQLAlchemy()
 class Post(DB.Model):
@@ -12,6 +12,7 @@ class Post(DB.Model):
     title = DB.Column(DB.String(128), unique=True, index=True)
     slug = DB.Column(DB.String(128), unique=True, index=True)
     content = DB.Column(DB.Text)
+    content_html = DB.Column(DB.Text)
     published = DB.Column(DB.Boolean, index=True)
     timestamp = DB.Column(DB.DateTime, default=datetime.datetime.now, index=True)
 
@@ -46,3 +47,17 @@ class Post(DB.Model):
         """query all published posts and order them by DESC"""
         posts = Post.query.filter_by(published=True).order_by(DB.desc(Post.timestamp)).all()
         return posts
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p'
+                       ]
+                    
+        target.content_html = bleach.linkfy(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True
+        ))
+
+    DB.event.listen(Post.content, 'set', Post.on_changed_body)
