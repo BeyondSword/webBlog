@@ -5,12 +5,13 @@ from test.log import logger
 from flask_sqlalchemy import SQLAlchemy
 import bleach
 from markdown import markdown
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DB = SQLAlchemy()
-class Role(DB.model):
+class Role(DB.Model):
     __tablename__ = 'roles'
     index = DB.Column(DB.Integer, primary_key=True)
-    name = DB.Column(DB.String(64), unique=True) 
+    name = DB.Column(DB.String(64), unique=True)
     users = DB.relationship('User', backref='role')
 
     def __repr__(self):
@@ -19,7 +20,21 @@ class User(DB.Model):
     __tablename__ = 'users'
     index = DB.Column(DB.Integer, primary_key=True)
     username = DB.Column(DB.String(64), unique=True)
+    password_hash = DB.Column(DB.String(128))
     role_id = DB.Column(DB.Integer, DB.ForeignKey("roles.id"))
+
+    @property
+    def password(self):
+        """keep password from reading"""
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        """verify if the password is valid"""
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return '<Role %r>' % self.username
@@ -46,7 +61,7 @@ class Post(DB.Model):
         DB.session.commit()
 
     def __repr__(self):
-        pass
+        return '<Post %r>' %self.title
     #insert one post
     @classmethod
     def insert(cls, title, content, published):
