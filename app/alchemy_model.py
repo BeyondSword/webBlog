@@ -1,14 +1,22 @@
 """define SQLAlchemy model"""
 import datetime
 import re
-from test.log import logger
+from tests.log import logger
 from flask_sqlalchemy import SQLAlchemy
 import bleach
 from markdown import markdown
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from . import LOGIN_MANAGER
+
+@LOGIN_MANAGER.user_loader
+def load_user(user_id):
+    """Return user info depend on primary key"""
+    return User.query.get(int(user_id))
 
 DB = SQLAlchemy()
 class Role(DB.Model):
+    """Different user could have diffrent roles"""
     __tablename__ = 'roles'
     index = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(64), unique=True)
@@ -16,12 +24,17 @@ class Role(DB.Model):
 
     def __repr__(self):
         return '<Role %r>' % self.name
-class User(DB.Model):
+class User(UserMixin, DB.Model):
+    """User
+    password_hash  password hash value
+    email  users use email to login
+    """
     __tablename__ = 'users'
     index = DB.Column(DB.Integer, primary_key=True)
-    username = DB.Column(DB.String(64), unique=True)
+    username = DB.Column(DB.String(64), unique=True, index=True)
+    email = DB.Column(DB.String(64), unique=True, index=True)
     password_hash = DB.Column(DB.String(128))
-    role_id = DB.Column(DB.Integer, DB.ForeignKey("roles.id"))
+    role_id = DB.Column(DB.Integer, DB.ForeignKey("roles.index"))
 
     @property
     def password(self):

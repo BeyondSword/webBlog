@@ -5,6 +5,14 @@
 {% block content_title %}{% if search %}Search "{{ search }}"{% else %}Blog entries{% endif %}{% endblock %}
 
 {% block content %}
+  <h2>Hello, 
+    {% if current_user.is_authenticated %}
+    {{ current_user.username }}
+    {% else %}
+    Stranger
+    {% endif %}
+    !
+  </h2>  
   {% for post in posts%}
     <h3>
       <a href="{% if post.published %}{{ url_for('main.detail', slug=post.slug)

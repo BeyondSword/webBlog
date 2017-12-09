@@ -28,7 +28,7 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            {% if session.logged_in %}
+            {% if current_user.is_authenticated%}
               <li><a href="{{ url_for('main.drafts') }}">Drafts</a></li>
               <li><a href="{{ url_for('main.create') }}">Create Entry</a></li>
               <li><a href="{{ url_for('main.logout') }}">Log out</a></li>
