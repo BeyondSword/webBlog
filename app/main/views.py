@@ -1,7 +1,7 @@
 """Routers and views for blueprint 'main'
 """
 from tests.log import logger, set_log
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app.alchemy_model import Post
 from app.form import PostForm
 from flask import (request, render_template, session, url_for, redirect, flash)
@@ -64,7 +64,7 @@ def detail(slug):
 
 
 @main.route('/')
-def home_page():
+def index():
     """Direct to homepage.
     check whether the browser has logged in
     If loggin in: editing posts is allowed
@@ -72,5 +72,10 @@ def home_page():
 
     Support search in future
     """
+    #print "session user_id is ", session['user_id']
+    #print current_user.is_authenticated, current_user.username
+
     posts = Post.query_posts()
-    return render_template("index.html", posts=posts)
+    return render_template("index.html",
+                           posts=posts
+                          )

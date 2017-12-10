@@ -27,8 +27,9 @@ def create_app(config_name):
     # Initialize database and ORM.
     # If tables are not exist yet, create a new one.
     from app.alchemy_model import DB
-    with app.app_context():
-        DB.init_app(app)
+    #with app.app_context():
+    logger.info(__name__ + "test DB")
+    DB.init_app(app)
     if not os.path.isfile(config[config_name].DB_PATH):
         open(config[config_name].DB_PATH, 'w+')
         DB.drop_all(app=app)

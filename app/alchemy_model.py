@@ -6,13 +6,14 @@ from flask_sqlalchemy import SQLAlchemy
 import bleach
 from markdown import markdown
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, _compat
 from . import LOGIN_MANAGER
 
 @LOGIN_MANAGER.user_loader
 def load_user(user_id):
     """Return user info depend on primary key"""
     return User.query.get(int(user_id))
+
 
 DB = SQLAlchemy()
 class Role(DB.Model):
@@ -38,8 +39,17 @@ class User(UserMixin, DB.Model):
 
     @property
     def password(self):
-        """keep password from reading"""
+        """Keep password from reading"""
         raise AttributeError('password is not a readable attribute')
+
+    def get_id(self):
+        """Override get_id  id=>index"""
+        try:
+            return _compat.text_type(self.index)
+        except AttributeError:
+            raise NotImplementedError('No `id` attribute - override `get_id`')
+
+
 
     @password.setter
     def password(self, password):
@@ -102,7 +112,6 @@ class Post(DB.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p'
                        ]
-                    
         target.content_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True
