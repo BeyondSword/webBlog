@@ -49,8 +49,6 @@ class User(UserMixin, DB.Model):
         except AttributeError:
             raise NotImplementedError('No `id` attribute - override `get_id`')
 
-
-
     @password.setter
     def password(self, password):
         self.password_hash = generate_password_hash(password)

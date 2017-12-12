@@ -17,9 +17,9 @@ class RegistrationForm(flask_wtf.Form):
     """Define the register-form"""
     email = StringField(u"邮箱", validators=[Required(), Email(), Length(1, 64)])
     username = StringField(u"昵称", validators=[
-        Required(), Length(1, 64), Regexp(u'^[A-Za-z\u4e00-\u9fa5]*$', 0,
+        Required(), Length(1, 64), Regexp(u'^[0-9A-Za-z\u4e00-\u9fa5]*$', 0,
                                           u'昵称只能包含中英文')])
     password = PasswordField(u"密码", validators=[
         Required(), EqualTo("password2", message=u"密码不一致")])
     password2 = PasswordField(u"确认密码", validators=[Required()])
-    submit = SubmitField("注册")
+    submit = SubmitField(u"注册")
