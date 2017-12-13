@@ -64,9 +64,9 @@ class Post(DB.Model):
     """define post"""
     __tablename__ = 'posts'
     index = DB.Column(DB.Integer, primary_key=True)
-    title = DB.Column(DB.String(128), unique=True, index=True)
+    title = DB.Column(DB.String(128), unique=True, index=True, nullable=False)
     slug = DB.Column(DB.String(128), unique=True, index=True)
-    content = DB.Column(DB.Text)
+    content = DB.Column(DB.Text, nullable=False)
     content_html = DB.Column(DB.Text)
     published = DB.Column(DB.Boolean, index=True)
     timestamp = DB.Column(DB.DateTime, default=datetime.datetime.now, index=True)
@@ -98,9 +98,13 @@ class Post(DB.Model):
 
     #query all posts
     @classmethod
-    def query_posts(cls):
-        """query all published posts and order them by DESC"""
-        posts = Post.query.filter_by(published=True).order_by(DB.desc(Post.timestamp)).all()
+    def query_posts(cls, page=1, per_page=5):
+        """ Query all published posts.
+            order by timestamp(DESC).
+            support pagination.
+        """
+        posts = Post.query.filter_by(published=True).\
+            order_by(DB.desc(Post.timestamp)).pagenate(page, per_page)
         return posts
 
     @staticmethod

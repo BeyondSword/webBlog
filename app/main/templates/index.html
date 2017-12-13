@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% import '_helpers.html' as helpers%}
 {% block title %}Blog entries{% endblock %}
 
 {% block content_title %}{% if search %}Search "{{ search }}"{% else %}Blog entries{% endif %}{% endblock %}
@@ -24,4 +24,7 @@
   {% else %}
     <p>No entries have been created yet.</p>
   {% endfor %}
-{% endblock %}
+ 
+ {{ helpers.pagenate(posts) }}
+
+  {% endblock %}
