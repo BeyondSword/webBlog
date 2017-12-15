@@ -121,4 +121,18 @@ class Post(DB.Model):
 
         logger.info("transfer markdown text to html")
 
+    @staticmethod
+    def fake_generate(count=100):
+        ''' Generate some fake posts.
+        It can be used to test pagination.
+        '''
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            u = User()
+
+
 DB.event.listen(Post.content, 'set', Post.on_changed_body)
