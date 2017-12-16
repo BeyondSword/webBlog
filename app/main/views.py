@@ -63,7 +63,7 @@ def detail(slug):
 
 
 @main.route('/')
-@main.route('/page<int:page>')
+# @main.route('/page<int:page>')
 def index(page=1):
     """Direct to homepage.
     check whether the browser has logged in
@@ -75,7 +75,10 @@ def index(page=1):
     """
 
     #posts is a class Pagination object
-    posts = Post.query_posts(page)
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query_posts(page)
+    posts = pagination.items
     return render_template("index.html",
-                           posts=posts
+                           posts=posts,
+                           pagination=pagination
                           )
