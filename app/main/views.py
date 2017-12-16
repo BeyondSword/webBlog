@@ -1,7 +1,7 @@
 """Routers and views for blueprint 'main'
 """
 from tests.log import logger, set_log
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.alchemy_model import Post
 from app.form import PostForm
 from flask import (request, render_template, session, url_for, redirect, flash)
@@ -27,9 +27,9 @@ def create():
             return redirect(url_for('main.edit', slug=post.slug))
     return render_template('create.html', post_form=PostForm())
 
-@main.route('/<slug>/edit/', methods=['GET', 'POST'])
+@main.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit(slug):
+def edit(id):
     post = Post.query.filter_by(slug=slug).first_or_404()
     post_form = PostForm()
     #check if method is 'POST' & data is validate
@@ -51,26 +51,23 @@ def edit(slug):
     post_form.published.data = post.published
     return render_template('edit.html', post_form=post_form)
 
-
-
-@main.route("/<slug>/")
-def detail(slug):
-    if session.get('logged_in'):
-        post = Post.query.filter_by(slug=slug).first_or_404()
+@main.route("/posts/<int:id>/")
+def detail(id):
+    ''' Get dedicated post '''
+    if current_user.is_authenticated:
+        post = Post.query.filter_by(id=id).first_or_404()
+    # If not logged yet, only published post allowed
     else:
-        post = Post.query.filter_by(slug=slug, published=True).first_or_404()
-    return render_template('detail.html', post=post)
-
+        post = Post.query.filter_by(id=id, published=True).first_or_404()
+    return render_template('detail.html', post=post, page_id=id)
 
 @main.route('/')
-# @main.route('/page<int:page>')
 def index(page=1):
     """Direct to homepage.
     check whether the browser has logged in
     If loggin in: editing posts is allowed
     If not: it can only read posts
 
-    Support pagination in future
     Support search in future
     """
 
