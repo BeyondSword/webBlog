@@ -62,20 +62,23 @@ def detail(slug):
     return render_template('detail.html', post=post)
 
 
-
 @main.route('/')
-def index():
+# @main.route('/page<int:page>')
+def index(page=1):
     """Direct to homepage.
     check whether the browser has logged in
     If loggin in: editing posts is allowed
     If not: it can only read posts
 
+    Support pagination in future
     Support search in future
     """
-    #print "session user_id is ", session['user_id']
-    #print current_user.is_authenticated, current_user.username
 
-    posts = Post.query_posts()
+    #posts is a class Pagination object
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query_posts(page)
+    posts = pagination.items
     return render_template("index.html",
-                           posts=posts
+                           posts=posts,
+                           pagination=pagination
                           )

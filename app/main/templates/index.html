@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
+{% import "includes/_macros.html" as macros %}
 {% block title %}Blog entries{% endblock %}
-
 {% block content_title %}{% if search %}Search "{{ search }}"{% else %}Blog entries{% endif %}{% endblock %}
 
 {% block content %}
@@ -24,4 +23,8 @@
   {% else %}
     <p>No entries have been created yet.</p>
   {% endfor %}
-{% endblock %}
+ 
+  <div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+  </div>
+  {% endblock %}
