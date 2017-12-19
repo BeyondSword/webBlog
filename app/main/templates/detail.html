@@ -9,13 +9,16 @@
 {% block content_title %}{{ post.title }}{% endblock %}
 
 {% block extra_header %}
-  {% if session.logged_in %}
-    <li><a href="{{ url_for('main.edit', slug=post.slug) }}">Edit post</a></li>
-  {% endif %}
 {% endblock %}
 
 {% block content %}
- <p>Created at {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
+
+<div class="post-toolbar">
+  {% if current_user == post.author%}
+    <a class="btn btn-primary" href="{{url_for('main.edit', id=page_id)}}" role="button">编辑</a>
+  {% endif %}
+</div>
+<p>{{post.author.username}} 创建于 {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
   {% if post.content_html %} 
     {{ post.content_html | safe }}
   {% else %}

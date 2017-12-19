@@ -1,27 +1,30 @@
 {% extends "base.html" %}
-
+{% import "includes/_macros.html" as macros %}
 {% block title %}Blog entries{% endblock %}
-
 {% block content_title %}{% if search %}Search "{{ search }}"{% else %}Blog entries{% endif %}{% endblock %}
 
 {% block content %}
-  <h2>Hello, 
+  <h2>嗨, 
     {% if current_user.is_authenticated %}
     {{ current_user.username }}
     {% else %}
-    Stranger
+    陌生人
     {% endif %}
     !
   </h2>  
   {% for post in posts%}
     <h3>
-      <a href="{% if post.published %}{{ url_for('main.detail', slug=post.slug)
-          }}{% else %}{{ url_for('main.edit', slug=post.slug) }}{% endif %}">
+      <a href="{% if post.published %}{{ url_for('main.detail', id=post.id)
+          }}{% else %}{{ url_for('main.edit', id=post.id) }}{% endif %}">
         {{ post.title }}
       </a>
     </h3>
-    <p>Created at {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
+    <p>创建于 {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
   {% else %}
-    <p>No entries have been created yet.</p>
+    <p>现在还没有被创建的博客。</p>
   {% endfor %}
-{% endblock %}
+ 
+  <div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+  </div>
+  {% endblock %}

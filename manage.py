@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 from app import create_app
 
-APP = create_app('default')
+APP = create_app('development')
 
 # main entrance
 def main():

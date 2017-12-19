@@ -3,8 +3,8 @@
 from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
-from .forms import LoginForm
-from ..alchemy_model import User
+from .forms import LoginForm, RegistrationForm
+from ..alchemy_model import User, DB
 
 @auth.route("/login/", methods=['GET', 'POST'])
 def login():
@@ -14,8 +14,6 @@ def login():
         user = User.query.filter_by(email=login_form.email.data).first()
         if user is not None and user.verify_password(login_form.password.data):
             login_user(user, login_form.remember_me.data)
-            #print "session user_id is ", session['user_id']
-            #print current_user.is_authenticated, current_user.username
             return redirect(request.args.get('next') or
                             url_for('main.index')
                            )
@@ -30,3 +28,18 @@ def logout():
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
+
+@auth.route("/register/", methods=['GET', 'POST'])
+def register():
+    ''' Sign up '''
+    register_form = RegistrationForm()
+    if register_form.validate_on_submit():
+        user = User(email=register_form.email.data,
+                    username=register_form.username.data,
+                    password=register_form.password.data,
+                   )
+        DB.session.add(user)
+        DB.session.commit()
+        flash("registered successful")
+        redirect(url_for("auth.login"))
+    return render_template("register.html", register_form=register_form)
