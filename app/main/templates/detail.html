@@ -16,11 +16,9 @@
 <div class="post-toolbar">
   {% if current_user == post.author%}
     <a class="btn btn-primary" href="{{url_for('main.edit', id=page_id)}}" role="button">编辑</a>
-  {% else %}
-    <a class="btn btn-primary" href="{{url_for('main.edit', id=page_id)}}" role="button">Link</a>
   {% endif %}
 </div>
-<p>Created at {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
+<p>{{post.author.username}} 创建于 {{ post.timestamp.strftime('%Y/%m/%d   %X') }}</p>
   {% if post.content_html %} 
     {{ post.content_html | safe }}
   {% else %}

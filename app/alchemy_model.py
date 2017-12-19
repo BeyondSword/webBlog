@@ -63,7 +63,7 @@ class User(UserMixin, DB.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return '<Role %r>' % self.username
+        return '<User %r>' % self.username
 
     @staticmethod
     def fake_generate(count=100):
@@ -117,11 +117,12 @@ class Post(DB.Model):
         return '<Post %r>' %self.title
     #insert one post
     @classmethod
-    def insert(cls, title, content, published):
+    def insert(cls, title, content, published, author):
         """insert single row data"""
         post = Post(title=title,
                     content=content,
-                    published=published
+                    published=published,
+                    author=author
                    )
         post.slug = re.sub(r'[^\w]+', '-', post.title.lower())
         DB.session.add(post)

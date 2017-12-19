@@ -18,19 +18,21 @@ def create():
     if post_form.validate_on_submit():
         post = Post.insert(title=post_form.title.data,
                            content=post_form.content.data,
-                           published=post_form.published.data
+                           published=post_form.published.data,
+                           author=current_user._get_current_object()
                           )
         flash('Post created successfully.', 'success')
         if post.published:
-            return redirect(url_for('main.detail', slug=post.slug))
+            return redirect(url_for('main.detail', id=post.id))
         else:
-            return redirect(url_for('main.edit', slug=post.slug))
+            return redirect(url_for('main.edit', id=post.id))
     return render_template('create.html', post_form=PostForm())
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
-    post = Post.query.filter_by(slug=slug).first_or_404()
+    ''' Edit dedicated post '''
+    post = Post.query.filter_by(id=id).first_or_404()
     post_form = PostForm()
     #check if method is 'POST' & data is validate
     if post_form.validate_on_submit():
@@ -40,9 +42,9 @@ def edit(id):
                    )
         flash('Post saved successfully.', 'success')
         if post.published:
-            return redirect(url_for('.detail', slug=post.slug))
+            return redirect(url_for('.detail', id=post.id))
         else:
-            return redirect(url_for('.edit', post=post))
+            return redirect(url_for('.edit', id=post.id))
     #flash('Title and Content are required.', 'danger')
 
     #get data from DB to form
