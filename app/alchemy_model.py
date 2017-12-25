@@ -177,6 +177,8 @@ class Comment(DB.Model):
     ''' Define Comment Model '''
     __tablename__ = 'comments'
     index = DB.Column(DB.Integer, primary_key=True)
+    # If not register, regard tmp_username as username
+    tmp_username = DB.Column(DB.String(64))
     content = DB.Column(DB.Text, nullable=False)
     content_html = DB.Column(DB.Text)
     timestamp = DB.Column(DB.DateTime, default=datetime.datetime.now, index=True)
