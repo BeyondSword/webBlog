@@ -9,8 +9,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, _compat
 from . import LOGIN_MANAGER
 from itsdangerous import TimedSerializer, SignatureExpired
-from flask import current_app
+from flask import current_app, url_for
 
+
+DB = SQLAlchemy()
+class Permission:
+    FOLLOW = 0x01
+    COMMENT = 0x02
+    WRITE_ARTICLES = 0X04
+    MODERATE_COMMENTS = 0X08
+    ADMINISTER = 0x80
 
 @LOGIN_MANAGER.user_loader
 def load_user(user_id):
@@ -18,14 +26,40 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-DB = SQLAlchemy()
 class Role(DB.Model):
     """Different user could have diffrent roles"""
     __tablename__ = 'roles'
     id = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(64), unique=True)
+    default = DB.column(DB.Boolean, default=False, index=True)
+    permissions = DB.column(DB.Interger)
+
     users = DB.relationship('User', backref='role')
 
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'User' : (Permission.COMMENT | 
+                      Permission.FOLLOW |
+                      Permission.WRITE_ARTICLES, True),
+            'Moderator' : (Permission.COMMENT | 
+                           Permission.FOLLOW |
+                           Permission.WRITE_ARTICLES |
+                           Permission.MODERATE_COMMENTS, False),
+            'Administrator' : (Permission.COMMENT | 
+                               Permission.FOLLOW |
+                               Permission.WRITE_ARTICLES |
+                               Permission.MODERATE_COMMENTS |
+                               Permission.ADMINISTER, False)
+        }
+        for r in roles:
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role.name = r
+                role.default = roles[r][1]
+                role.permissions = roles[r][0]
+                DB.session.add(role)
+            db.session.commit()
     def __repr__(self):
         return '<Role %r>' % self.name
 class User(UserMixin, DB.Model):
@@ -68,6 +102,11 @@ class User(UserMixin, DB.Model):
 
         return check_password_hash(self.password_hash, password)
 
+    def to_json(self):
+        json_user = {
+            ""
+
+        }
     def __repr__(self):
         return '<User %r>' % self.username
 
@@ -127,6 +166,7 @@ class Post(DB.Model):
     # identify post author
     author_id = DB.Column(DB.Integer, DB.ForeignKey('users.id'))
 
+    comments = DB.relationship('Comment', backref='post', lazy='dynamic')
     #modify post
     def modify(self, title, content, published):
         """modify single row data"""
@@ -140,8 +180,15 @@ class Post(DB.Model):
     def to_json(self):
         ''' Convert post's attributes to a serialized dict '''
         json_post = {
-            ""
-
+            'url' : url_for('api.get_post', id=self.id, _external=True),
+            'title': self.title,
+            'content': self.content,
+            'content_html': self.content_html,
+            'published': self.published,
+            'timestamp': self.timestamp,
+            'author_id': self.author_id,
+            'comments': self.comments,
+            'comment_count': self.comments.count()
         }
 
         return json_post
