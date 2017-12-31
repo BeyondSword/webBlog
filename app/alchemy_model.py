@@ -8,6 +8,9 @@ from markdown import markdown
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, _compat
 from . import LOGIN_MANAGER
+from itsdangerous import TimedSerializer, SignatureExpired
+from flask import current_app
+
 
 @LOGIN_MANAGER.user_loader
 def load_user(user_id):
@@ -59,7 +62,10 @@ class User(UserMixin, DB.Model):
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
-        """verify if the password is valid"""
+        """ verify if the password is valid 
+            if valid, return True, else return False
+        """
+
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
@@ -89,6 +95,24 @@ class User(UserMixin, DB.Model):
         except IntegrityError as e:
             DB.session.rollback()
 
+    def generate_auth_token(self):
+        ''' Generate auth token according
+        current_user's id
+        '''
+        s = TimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({"id" : self.id})
+
+    @staticmethod
+    def verify_token(token):
+        ''' max_age is expire time(second) '''
+        ''' return the correspond user instance'''
+        s = TimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token, max_age=3600)
+        except SignatureExpired:
+            return None
+        return User.query.get(data["id"])
+
 class Post(DB.Model):
     """define post"""
     __tablename__ = 'posts'
@@ -112,6 +136,15 @@ class Post(DB.Model):
         self.published = published
         self.timestamp = datetime.datetime.now()
         DB.session.commit()
+
+    def to_json(self):
+        ''' Convert post's attributes to a serialized dict '''
+        json_post = {
+            ""
+
+        }
+
+        return json_post
 
     def __repr__(self):
         return '<Post %r>' %self.title
