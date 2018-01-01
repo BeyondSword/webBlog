@@ -31,13 +31,14 @@ class Role(DB.Model):
     __tablename__ = 'roles'
     id = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(64), unique=True)
-    default = DB.column(DB.Boolean, default=False, index=True)
-    permissions = DB.column(DB.Interger)
+    default = DB.Column(DB.Boolean, default=False, index=True)
+    permissions = DB.Column(DB.Integer)
 
     users = DB.relationship('User', backref='role')
 
     @staticmethod
     def insert_roles():
+        ''' Insert or Update roles '''
         roles = {
             'User' : (Permission.COMMENT | 
                       Permission.FOLLOW |
@@ -46,20 +47,17 @@ class Role(DB.Model):
                            Permission.FOLLOW |
                            Permission.WRITE_ARTICLES |
                            Permission.MODERATE_COMMENTS, False),
-            'Administrator' : (Permission.COMMENT | 
-                               Permission.FOLLOW |
-                               Permission.WRITE_ARTICLES |
-                               Permission.MODERATE_COMMENTS |
-                               Permission.ADMINISTER, False)
+            'Administrator' : (0xff, False)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
+                role = Role()
                 role.name = r
                 role.default = roles[r][1]
                 role.permissions = roles[r][0]
                 DB.session.add(role)
-            db.session.commit()
+            DB.session.commit()
     def __repr__(self):
         return '<Role %r>' % self.name
 class User(UserMixin, DB.Model):
@@ -79,6 +77,17 @@ class User(UserMixin, DB.Model):
     # Related to role_id
     role_id = DB.Column(DB.Integer, DB.ForeignKey("roles.id"))
     posts = DB.relationship('Post', backref='author', lazy='dynamic')
+
+    def __init__(self, **kwargs):
+        # Call __init__ method of base class  
+        super(User, self).__init__(**kwargs)
+        # If user does not have role, set role
+        if self.role_id is None:
+            if(self.email == current_app.config["FLASK_ADMIN"]):
+                self.role_id = Role.query.filter_by(name="Administrator").first()
+            else:
+                self.role_id = Role.query.filter_by(default=True).first()
+
     @property
     def password(self):
         """Keep password from reading"""
@@ -99,7 +108,6 @@ class User(UserMixin, DB.Model):
         """ verify if the password is valid 
             if valid, return True, else return False
         """
-
         return check_password_hash(self.password_hash, password)
 
     def to_json(self):

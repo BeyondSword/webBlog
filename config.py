@@ -23,6 +23,8 @@ class DevelopmentConfig(object):
     #pagination
     PAGINATION_PER_PAGE = 5
 
+    #Admin email
+    FLASK_ADMIN = "boy@shore.com"
 class TestingConfig:
     ''' Configure the flask application
         in testing env
@@ -44,6 +46,8 @@ class TestingConfig:
     #pagination
     PAGINATION_PER_PAGE = 5
 
+    FLASK_ADMIN = "boy@shore.com"
+
 class ProductionConfig:
     ''' Configure the flask application
         in product env
@@ -64,6 +68,7 @@ class ProductionConfig:
 
     #pagination
     PAGINATION_PER_PAGE = 5
+    FLASK_ADMIN = "boy@shore.com"
 
 config = {
     #a dict to save configs
